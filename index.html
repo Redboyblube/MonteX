@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monte Carlo Simülasyonu - Sayı Önerisi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        canvas {
+            margin: 20px auto;
+            display: block;
+        }
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 80%;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .form-container {
+            margin: 20px;
+        }
+        .results-container {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Monte Carlo Simülasyonu - Sayı Önerisi</h1>
+
+    <!-- Kullanıcı Parametre Girdileri -->
+    <div class="form-container">
+        <label>Çekiliş Sayısı: <input type="number" id="drawCount" value="6" min="1" max="90"></label>
+        <label>İterasyon Sayısı: <input type="number" id="iterations" value="10000"></label>
+        <button onclick="runSimulation()">Simülasyonu Başlat</button>
+    </div>
+
+    <!-- Sonuçların Görüntülenmesi -->
+    <h2>Sonuçlar</h2>
+    <div class="results-container" id="resultsContainer"></div>
+
+    <script>
+        /**
+         * Rastgele sayılar üretme
+         */
+        function generateRandomNumbers(count, max) {
+            const numbers = [];
+            while (numbers.length < count) {
+                let num = Math.floor(Math.random() * max) + 1;
+                if (!numbers.includes(num)) {
+                    numbers.push(num);
+                }
+            }
+            return numbers;
+        }
+
+        /**
+         * Monte Carlo Simülasyonu
+         */
+        function runSimulation() {
+            const drawCount = parseInt(document.getElementById('drawCount').value);
+            const iterations = parseInt(document.getElementById('iterations').value);
+
+            const frequency = Array(90).fill(0); // 1-90 arasındaki sayıların frekansı
+
+            // Simülasyon: Verileri üret ve frekansları güncelle
+            for (let i = 0; i < iterations; i++) {
+                const drawnNumbers = generateRandomNumbers(drawCount, 90);
+                drawnNumbers.forEach(num => frequency[num - 1]++);
+            }
+
+            // En sık çıkan sayıları öner
+            suggestOptimalNumbers(frequency);
+        }
+
+        /**
+         * En Sık Çıkan Sayıları Öner
+         */
+        function suggestOptimalNumbers(frequency) {
+            const resultsDiv = document.getElementById('resultsContainer');
+            resultsDiv.innerHTML = '<h3>Önerilen Sayılar</h3>';
+
+            // Frekansı büyükten küçüğe sıralayıp en sık çıkanları önerelim
+            const sortedFreq = [...frequency].map((freq, idx) => ({ number: idx + 1, frequency: freq }))
+                                            .sort((a, b) => b.frequency - a.frequency); // Frekansı büyükten küçüğe sırala
+
+            const topNumbers = sortedFreq.slice(0, 5); // En yüksek 5 frekanslı sayıyı al
+
+            const recommendedNumbers = topNumbers.map(item => item.number).join(", ");
+            resultsDiv.innerHTML += `<p>En sık çıkan sayılar: ${recommendedNumbers}</p>`;
+        }
+    </script>
+</body>
+</html>
